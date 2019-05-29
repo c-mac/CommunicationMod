@@ -46,10 +46,11 @@ public class CommunicationMod implements PostInitializeSubscriber, PostUpdateSub
     private static final String COMMAND_OPTION = "command";
     private static final String GAME_START_OPTION = "runAtGameStart";
     private static final String INITIALIZATION_TIMEOUT_OPTION = "maxInitializationTimeout";
-    private static final String DEFAULT_COMMAND = "";
+    private static final String DEFAULT_COMMAND = "python /Users/cam/projects/spirecomm/main.py";
     private static final long DEFAULT_TIMEOUT = 10L;
 
     public CommunicationMod(){
+        System.out.println("Hello! This is using my JAR");
         BaseMod.subscribe(this);
 
         try {
@@ -58,9 +59,12 @@ public class CommunicationMod implements PostInitializeSubscriber, PostUpdateSub
             defaults.put(INITIALIZATION_TIMEOUT_OPTION, Long.toString(DEFAULT_TIMEOUT));
             communicationConfig = new SpireConfig("CommunicationMod", "config", defaults);
             String command = communicationConfig.getString(COMMAND_OPTION);
+            logger.error(String.format("command: %s", command));
+            logger.error(command.isEmpty());
             // I want this to always be saved to the file so people can set it more easily.
-            if (command == null) {
+            if (command.isEmpty()) {
                 communicationConfig.setString(COMMAND_OPTION, DEFAULT_COMMAND);
+                logger.error(String.format("communication config command: %s", communicationConfig.getString(COMMAND_OPTION)));
                 communicationConfig.save();
             }
             communicationConfig.save();
@@ -225,10 +229,15 @@ public class CommunicationMod implements PostInitializeSubscriber, PostUpdateSub
     }
 
     private static String[] getSubprocessCommand() {
-        if (communicationConfig == null) {
-            return new String[0];
-        }
-        return communicationConfig.getString(COMMAND_OPTION).trim().split("\\s+");
+        return "python /Users/cam/projects/spirecomm/main.py";
+        // if (communicationConfig == null) {
+        //     return new String[0];
+        // }
+        // String commandStr = communicationConfig.getString(COMMAND_OPTION);
+        // logger.error(String.format("command str: %s", commandStr));
+        // String formattedCommand = commandStr.trim().split("\\s+");
+        // logger.error(String.format("formatted command str: %s", formattedCommand));
+        // return formattedCommand;
     }
 
     private static String getSubprocessCommandString() {
@@ -272,7 +281,8 @@ public class CommunicationMod implements PostInitializeSubscriber, PostUpdateSub
             }
         }
         // TODO: Check compatibility for non-Windows OS here:
-        ProcessBuilder builder = new ProcessBuilder(getSubprocessCommand());
+        // ProcessBuilder builder = new ProcessBuilder(getSubprocessCommand());
+        ProcessBuilder builder = new ProcessBuilder("/usr/local/bin/python3", "/Users/cam/projects/spirecomm/main.py");
         File errorLog = new File("communication_mod_errors.log");
         builder.redirectError(ProcessBuilder.Redirect.appendTo(errorLog));
         try {
